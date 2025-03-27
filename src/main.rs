@@ -18,14 +18,30 @@ fn main() -> io::Result<()>  {
 
     match File::open(file_path2.unwrap()) {
         Ok(file) => {
+
             println!("File successfully opened!");
             let mut buf_reader = io::BufReader::new(file);
             let mut file_conts = Vec::new();
             buf_reader.read_to_end(&mut file_conts).expect("Failed to read file");
             println!("File was successfully read!");
-            println!("File conts was: {:?}", bytes_to_hex(&file_conts));
-
-
+            println!("which option do you want");
+            println!("strings : pulls all strings from the file");
+            println!("hexdump : dumps all hex of file");
+            let hex = bytes_to_hex(&file_conts);
+            let ascii = hex_to_ascii(&hex);
+            let mut choice:String = String::new();
+            io::stdin().read_line(&mut choice)?;
+            match choice.trim() {
+                "hexdump" => {
+                    println!("File conts was: {:?}", hex);
+                },
+                "strings" => {
+                    println!("the hex encoded string is: {}", ascii);
+                },
+                _ => {
+                    println!("invalid choice");
+                }
+            }
         }
         Err(e) => {
             println!("File open error : {}", e);
@@ -36,4 +52,8 @@ fn main() -> io::Result<()>  {
 }
 fn bytes_to_hex(bytes: &[u8]) -> String {
     bytes.iter().map(|byte| format!("{:02X}", byte)).collect::<String>()
+}
+
+fn hex_to_ascii(hex: &str) -> String {
+    (0..hex.len()).step_by(2).map(|i| u8::from_str_radix(&hex[i..i+2],16).unwrap()as char).collect()
 }
